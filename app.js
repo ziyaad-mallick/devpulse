@@ -2,6 +2,14 @@ const API = 'https://api.github.com';
 const ACCENT = '#c9f23f';
 let langChart = null;
 
+// GitHub's full contribution calendar isn't in the public REST API (only the
+// last ~90 days of /events are). We scrape the real public calendar HTML through
+// a CORS proxy, with fallbacks. If all fail we degrade to the /events graph.
+const PROXIES = [
+    u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+    u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u)
+];
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -31,21 +39,27 @@ document.addEventListener('DOMContentLoaded', () => {
 async function load(username) {
     showSkeleton();
     try {
-        const [uRes, rRes, eRes] = await Promise.all([
+        const [uRes, rRes] = await Promise.all([
             fetch(`${API}/users/${username}`),
-            fetch(`${API}/users/${username}/repos?per_page=100&sort=updated`),
-            fetch(`${API}/users/${username}/events?per_page=100`)
+            fetch(`${API}/users/${username}/repos?per_page=100&sort=updated`)
         ]);
 
         if (uRes.status === 404) throw new Error('not found');
         if (uRes.status === 403) throw new Error('rate limit');
         if (!uRes.ok) throw new Error('api error');
 
-        const user   = await uRes.json();
-        const repos  = await rRes.json().then(d => Array.isArray(d) ? d : []);
-        const events = await eRes.json().then(d => Array.isArray(d) ? d : []);
+        const user  = await uRes.json();
+        const repos = await rRes.json().then(d => Array.isArray(d) ? d : []);
 
-        render(user, repos, events);
+        // Real contribution calendar (best effort). Falls back to /events.
+        let calendar = await fetchCalendar(username);
+        if (!calendar) {
+            const events = await fetch(`${API}/users/${username}/events?per_page=100`)
+                .then(r => r.json()).then(d => Array.isArray(d) ? d : []).catch(() => []);
+            calendar = calendarFromEvents(events);
+        }
+
+        render(user, repos, calendar);
     } catch (err) {
         showError(err.message);
     }
@@ -53,18 +67,15 @@ async function load(username) {
 
 // ── Render ────────────────────────────────────────────────────────────────────
 
-function render(user, repos, events) {
+function render(user, repos, calendar) {
     if (langChart) { langChart.destroy(); langChart = null; }
 
-    const contrib = buildContrib(events);
-    const { current, longest } = streaks(events);
-    const totalPushes = Object.values(contrib).reduce((a, b) => a + b, 0);
-    const activeDays = Object.keys(contrib).length;
+    const { current, longest } = streaksFromCells(calendar.cells);
 
     const dash = el('div', 'dashboard');
     dash.append(
         profilePanel(user, current, longest),
-        heatmapPanel(contrib, totalPushes),
+        heatmapPanel(calendar),
         languagesPanel(repos),
         reposPanel(repos),
         statsPanel(user, repos)
@@ -72,6 +83,74 @@ function render(user, repos, events) {
     document.getElementById('dashArea').replaceChildren(dash);
 
     drawChart(repos);
+}
+
+// ── Contribution calendar (real, via proxy) ───────────────────────────────────
+
+async function fetchCalendar(username) {
+    const target = `https://github.com/users/${username}/contributions`;
+    for (const proxy of PROXIES) {
+        try {
+            const r = await fetch(proxy(target));
+            if (!r.ok) continue;
+            const parsed = parseCalendar(await r.text());
+            if (parsed.cells.length) return parsed;
+        } catch (_) { /* try next proxy */ }
+    }
+    return null;
+}
+
+function parseCalendar(html) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+
+    // day-count lives in the tooltip linked by id ("10 contributions on June 8th.")
+    const counts = {};
+    doc.querySelectorAll('tool-tip').forEach(t => {
+        const m = t.textContent.trim().match(/^([\d,]+|No)/);
+        counts[t.getAttribute('for')] = m ? (m[1] === 'No' ? 0 : +m[1].replace(/,/g, '')) : 0;
+    });
+
+    const cells = [];
+    doc.querySelectorAll('td.ContributionCalendar-day').forEach(td => {
+        const date = td.getAttribute('data-date');
+        if (!date) return;
+        const p = td.id.split('-'); // contribution-day-component-{weekday}-{week}
+        cells.push({
+            date,
+            level: +(td.getAttribute('data-level') || 0),
+            count: counts[td.id] ?? 0,
+            week: +p[4], day: +p[3]
+        });
+    });
+
+    let total = cells.reduce((a, c) => a + c.count, 0);
+    const h2 = doc.querySelector('h2');
+    const tm = h2 && h2.textContent.replace(/,/g, '').match(/(\d+)\s+contribution/i);
+    if (tm) total = +tm[1];
+
+    return { cells, total, partial: false };
+}
+
+// fallback: synthesize cells from the last ~90 days of public push events
+function calendarFromEvents(events) {
+    const map = {};
+    events.forEach(e => {
+        if (e.type === 'PushEvent') {
+            const k = dateKey(new Date(e.created_at));
+            map[k] = (map[k] || 0) + (e.payload?.commits?.length || 1);
+        }
+    });
+    const cells = [];
+    const today = new Date();
+    const start = new Date(today); start.setDate(start.getDate() - 363);
+    // align start to Sunday so weekday rows match
+    start.setDate(start.getDate() - start.getDay());
+    for (let i = 0, d = new Date(start); d <= today; d.setDate(d.getDate() + 1), i++) {
+        const k = dateKey(d);
+        const c = map[k] || 0;
+        cells.push({ date: k, level: level(c), count: c, week: Math.floor(i / 7), day: d.getDay() });
+    }
+    return { cells, total: Object.values(map).reduce((a, b) => a + b, 0), partial: true };
 }
 
 // ── Profile panel ─────────────────────────────────────────────────────────────
@@ -115,39 +194,70 @@ function mini(val, label) {
 
 // ── Heatmap panel ─────────────────────────────────────────────────────────────
 
-function heatmapPanel(contrib, totalPushes) {
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const COL_W = 14; // cell 11 + gap 3
+
+function heatmapPanel(cal) {
     const p = panel('panel-heatmap');
-    const today = new Date();
-    const weeks = [];
-    for (let w = 51; w >= 0; w--) {
-        const days = [];
+
+    // group cells into week columns
+    const byWeek = {};
+    let maxWeek = 0;
+    cal.cells.forEach(c => { (byWeek[c.week] ||= {})[c.day] = c; if (c.week > maxWeek) maxWeek = c.week; });
+
+    // build grid columns + month labels
+    const cols = [];
+    const monthLabels = [];
+    let lastMonth = -1;
+    for (let w = 0; w <= maxWeek; w++) {
+        const week = byWeek[w] || {};
+        const slots = [];
+        let repDate = null;
         for (let d = 0; d < 7; d++) {
-            const dt = new Date(today);
-            dt.setDate(dt.getDate() - w * 7 + d);
-            const k = dateKey(dt);
-            const c = contrib[k] || 0;
-            days.push(`<div class="cell" data-l="${level(c)}" title="${k} · ${c}"></div>`);
+            const c = week[d];
+            if (c) {
+                if (!repDate) repDate = c.date;
+                slots.push(`<div class="cell" data-l="${c.level}" title="${c.count} on ${c.date}"></div>`);
+            } else {
+                slots.push(`<div class="cell empty"></div>`);
+            }
         }
-        weeks.push(`<div class="heatmap-week">${days.join('')}</div>`);
+        cols.push(`<div class="heatmap-week">${slots.join('')}</div>`);
+
+        if (repDate) {
+            const mo = +repDate.slice(5, 7) - 1;
+            if (mo !== lastMonth) {
+                lastMonth = mo;
+                monthLabels.push(`<span style="left:${w * COL_W}px">${MONTHS[mo]}</span>`);
+            }
+        }
     }
+
+    const sub = cal.partial
+        ? 'in the last 90 days · public push events only'
+        : 'contributions in the last year';
 
     p.innerHTML = `
         <div class="panel-h">
-            <span class="panel-title">Push Activity</span>
+            <span class="panel-title">Contribution Activity</span>
             <span class="legend">less
                 <span class="legend-cells">
-                    <span class="cell"></span>
-                    <span class="cell" data-l="1"></span>
-                    <span class="cell" data-l="2"></span>
-                    <span class="cell" data-l="3"></span>
-                    <span class="cell" data-l="4"></span>
+                    <span class="cell"></span><span class="cell" data-l="1"></span><span class="cell" data-l="2"></span><span class="cell" data-l="3"></span><span class="cell" data-l="4"></span>
                 </span>more</span>
         </div>
         <div class="heatmap-headline">
-            <span class="heatmap-big">${fmt(totalPushes)}</span>
-            <span class="heatmap-sub">commits pushed · recent public events</span>
+            <span class="heatmap-big">${fmt(cal.total)}</span>
+            <span class="heatmap-sub">${sub}</span>
         </div>
-        <div class="heatmap-body"><div class="heatmap">${weeks.join('')}</div></div>`;
+        <div class="heatmap-body">
+            <div class="cal">
+                <div class="cal-weekdays"><span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span></div>
+                <div class="cal-main">
+                    <div class="cal-months">${monthLabels.join('')}</div>
+                    <div class="cal-grid">${cols.join('')}</div>
+                </div>
+            </div>
+        </div>`;
     return p;
 }
 
@@ -287,37 +397,17 @@ function showError(msg) {
 
 // ── Data helpers ──────────────────────────────────────────────────────────────
 
-function buildContrib(events) {
-    const map = {};
-    events.forEach(e => {
-        if (e.type === 'PushEvent') {
-            const k = dateKey(new Date(e.created_at));
-            map[k] = (map[k] || 0) + (e.payload?.commits?.length || 1);
-        }
-    });
-    return map;
-}
-
-function streaks(events) {
-    const days = new Set();
-    events.forEach(e => {
-        if (e.type === 'PushEvent') {
-            const d = new Date(e.created_at); d.setHours(0, 0, 0, 0);
-            days.add(d.getTime());
-        }
-    });
-    if (!days.size) return { current: 0, longest: 0 };
-
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    let current = 0, c = new Date(today);
-    while (days.has(c.getTime())) { current++; c.setDate(c.getDate() - 1); }
-
-    const sorted = [...days].sort((a, b) => a - b);
-    let longest = 1, run = 1;
-    for (let i = 1; i < sorted.length; i++) {
-        if (sorted[i] - sorted[i - 1] === 864e5) longest = Math.max(longest, ++run);
-        else run = 1;
+function streaksFromCells(cells) {
+    const sorted = [...cells].sort((a, b) => a.date < b.date ? -1 : 1);
+    let longest = 0, run = 0;
+    for (const c of sorted) {
+        if (c.count > 0) { run++; if (run > longest) longest = run; }
+        else run = 0;
     }
+    // current: count back from the latest day; ignore today if it's still empty
+    let i = sorted.length - 1, current = 0;
+    if (i >= 0 && sorted[i].count === 0) i--;
+    for (; i >= 0; i--) { if (sorted[i].count > 0) current++; else break; }
     return { current, longest };
 }
 
