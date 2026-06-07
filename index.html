@@ -3,26 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevPulse — GitHub Activity Dashboard</title>
+    <title>DevPulse — read a developer at a glance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="app">
 
-    <!-- Top bar -->
     <header class="topbar">
-        <span class="topbar-logo">DevPulse</span>
-        <div class="search-row">
-            <input type="text" id="usernameInput" class="search-input"
-                   placeholder="GitHub username..." autocomplete="off">
-            <button id="searchBtn" class="search-btn">Search</button>
+        <div class="brand">
+            <span class="brand-mark"></span>
+            <span class="brand-name">devpulse</span>
         </div>
-        <p class="search-hint">Try: <span id="exampleUser">torvalds</span></p>
+        <form class="search" id="searchForm">
+            <input type="text" id="usernameInput" class="search-input"
+                   placeholder="github username" autocomplete="off" spellcheck="false">
+            <button type="submit" class="search-btn">Analyze</button>
+        </form>
+        <div class="topbar-meta">
+            <span class="topbar-hint">try <button class="link-btn" id="exampleUser">torvalds</button></span>
+        </div>
     </header>
 
-    <!-- Dashboard area -->
-    <main id="dashArea"></main>
+    <main id="dashArea" class="dash-area"></main>
 
 </div>
 <script src="app.js"></script>
