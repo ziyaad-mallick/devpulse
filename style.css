@@ -122,7 +122,13 @@ a { color: inherit; text-decoration: none; }
 .search-btn:hover { filter: brightness(1.08); }
 .search-btn:active { transform: translateY(1px); }
 
-.topbar-meta { margin-left: auto; }
+.topbar-meta { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+.batch-link {
+    font-family: var(--mono); font-size: 0.8rem; color: var(--accent);
+    border: 1px solid rgba(201,242,63,0.3); border-radius: var(--r-s);
+    padding: 5px 11px; transition: border-color .15s, background .15s;
+}
+.batch-link:hover { border-color: var(--accent); background: rgba(201,242,63,0.07); }
 .topbar-hint { color: var(--text-faint); font-size: 0.8rem; font-family: var(--mono); }
 .link-btn {
     background: none; border: none; cursor: pointer;

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevPulse Examples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0d1117;
+            color: #e6edf3;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #58a6ff;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .example-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .example-card:hover {
+            border-color: #58a6ff;
+            box-shadow: 0 4px 16px rgba(88, 166, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .example-icon {
+            font-size: 2em;
+            margin-bottom: 12px;
+        }
+
+        .example-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #58a6ff;
+            margin-bottom: 8px;
+        }
+
+        .example-username {
+            color: #8b949e;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+            font-family: monospace;
+        }
+
+        .example-description {
+            color: #8b949e;
+            font-size: 0.95em;
+            line-height: 1.5;
+            flex-grow: 1;
+            margin-bottom: 12px;
+        }
+
+        .example-link {
+            display: inline-block;
+            padding: 10px 16px;
+            background-color: #58a6ff;
+            color: #0d1117;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            align-self: flex-start;
+        }
+
+        .example-link:hover {
+            background-color: #79c0ff;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #58a6ff;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .info-box {
+            background-color: #161b22;
+            border-left: 4px solid #58a6ff;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            color: #58a6ff;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #8b949e;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            color: #79c0ff;
+        }
+
+        footer {
+            text-align: center;
+            color: #6e7681;
+            padding-top: 40px;
+            border-top: 1px solid #30363d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DevPulse Examples</h1>
+        <p class="subtitle">Explore famous developers' GitHub profiles</p>
+
+        <div class="section">
+            <h2>Famous Open Source Creators</h2>
+            <div class="example-grid">
+                <a href="index.html?user=torvalds" class="example-card">
+                    <div class="example-icon">🐧</div>
+                    <div class="example-name">Linus Torvalds</div>
+                    <div class="example-username">@torvalds</div>
+                    <div class="example-description">Creator of Linux and Git — see the commit history of the world's most influential software projects</div>
+                    <span class="example-link">→ View Profile</span>
+                </a>
+
+                <a href="index.html?user=gvanrossum" class="example-card">
+                    <div class="example-icon">🐍</div>
+                    <div class="example-name">Guido van Rossum</div>
+                    <div class="example-username">@gvanrossum</div>
+                    <div class="example-description">Creator of Python — explore the GitHub activity of one of the world's most beloved programming languages</div>
+                    <span class="example-link">→ View Profile</span>
+                </a>
+
+                <a href="index.html?user=jashkenas" class="example-card">
+                    <div class="example-icon">☕</div>
+                    <div class="example-name">Jeremy Ashkenas</div>
+                    <div class="example-username">@jashkenas</div>
+                    <div class="example-description">Creator of CoffeeScript and Underscore.js — see contributions from a legendary JavaScript developer</div>
+                    <span class="example-link">→ View Profile</span>
+                </a>
+
+                <a href="index.html?user=evanw" class="example-card">
+                    <div class="example-icon">⚡</div>
+                    <div class="example-name">Evan Wallace</div>
+                    <div class="example-username">@evanw</div>
+                    <div class="example-description">Creator of esbuild — a blazing fast TypeScript bundler and minifier</div>
+                    <span class="example-link">→ View Profile</span>
+                </a>
+
+                <a href="index.html?user=octocat" class="example-card">
+                    <div class="example-icon">🐙</div>
+                    <div class="example-name">The Octocat</div>
+                    <div class="example-username">@octocat</div>
+                    <div class="example-description">GitHub's official mascot — see GitHub's own repository activity and development</div>
+                    <span class="example-link">→ View Profile</span>
+                </a>
+
+                <a href="index.html?user=webkitgtk" class="example-card">
+                    <div class="example-icon">🌐</div>
+                    <div class="example-name">WebKit GTK</div>
+                    <div class="example-username">@webkitgtk</div>
+                    <div class="example-description">The WebKit GTK project — contributions to one of the web's core rendering engines</div>
+                    <span class="example-link">→ View Profile</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>How to Use DevPulse</h2>
+
+            <div class="info-box">
+                <h3>Search by Username</h3>
+                <p>Simply enter any GitHub username and press Enter to see their activity dashboard instantly. No authentication required!</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Share Profiles</h3>
+                <p>After viewing a profile, copy the URL to share it. Links like <code style="color: #79c0ff;">devpulse/index.html?user=torvalds</code> will auto-load the profile.</p>
+            </div>
+
+            <div class="info-box">
+                <h3>View Your Own Profile</h3>
+                <p>Go back to <a href="index.html" style="color: #58a6ff;">DevPulse</a> and search for your GitHub username to see your personal activity dashboard.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Features</h2>
+            <p style="color: #8b949e; margin-bottom: 20px;">DevPulse shows you:</p>
+            <ul style="color: #8b949e; margin-left: 20px; line-height: 2;">
+                <li>✓ Profile information (avatar, name, bio, followers)</li>
+                <li>✓ 12-month contribution heatmap (like GitHub's graph)</li>
+                <li>✓ Top programming languages (with a beautiful bar chart)</li>
+                <li>✓ Top 5 repositories by stars</li>
+                <li>✓ Commit streaks (current and longest)</li>
+                <li>✓ Full mobile responsiveness</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Technical Details</h2>
+
+            <div class="info-box">
+                <h3>Zero Backend</h3>
+                <p>DevPulse is a static web app. All data is fetched from GitHub's public API directly in your browser. No server, no backend, just client-side JavaScript.</p>
+            </div>
+
+            <div class="info-box">
+                <h3>No Build Step</h3>
+                <p>Open <code style="color: #79c0ff;">index.html</code> in your browser and it works immediately. No npm install, no build process, no dependencies to manage.</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Privacy</h3>
+                <p>Only public GitHub data is fetched. No tracking, no analytics, no cookies. Your data is fetched directly from GitHub's API — we don't store anything.</p>
+            </div>
+
+            <div class="code-block">
+Files: index.html | style.css | app.js<br>
+Size: ~37 KB total<br>
+Technologies: Vanilla JS, CSS3, GitHub API v3<br>
+            </div>
+        </div>
+
+        <footer>
+            <p>DevPulse — A beautiful GitHub activity dashboard</p>
+            <p style="margin-top: 10px; color: #464d54;">Made with ❤️ • <a href="index.html" style="color: #58a6ff;">Back to DevPulse</a></p>
+        </footer>
+    </div>
+</body>
+</html>

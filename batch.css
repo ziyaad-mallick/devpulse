@@ -1,0 +1,491 @@
+/* ============================================================================
+   DevPulse Batch — table compare view. Extends style.css with batch-specific
+   styles for multi-user screening and sortable table display.
+   ============================================================================ */
+
+body {
+    overflow: auto !important;
+}
+
+.app {
+    height: auto;
+    display: block;
+}
+
+/* ───────────────────────── Top navigation ───────────────────────── */
+
+.topnav {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+}
+
+.topnav a {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+}
+
+.topnav a:hover {
+    color: var(--text);
+}
+
+.topnav a.is-active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+/* ───────────────────────── Batch main layout ───────────────────────── */
+
+.batch-main {
+    padding: 18px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ───────────────────────── Input panel ───────────────────────── */
+
+.batch-input {
+    margin-bottom: 20px;
+}
+
+.batch-input .panel-h {
+    margin-bottom: 8px;
+}
+
+.batch-subtext {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.batch-input textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-s);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.batch-input textarea::placeholder {
+    color: var(--text-faint);
+}
+
+.batch-input textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(201, 242, 63, 0.12);
+}
+
+.batch-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    align-items: center;
+}
+
+.file-label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-s);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+}
+
+.file-label:hover {
+    border-color: var(--line);
+    background: var(--inset);
+}
+
+.file-label input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+#tokenInput {
+    padding: 8px 13px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-s);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+#tokenInput::placeholder {
+    color: var(--text-faint);
+}
+
+#tokenInput:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(201, 242, 63, 0.12);
+}
+
+.run-btn {
+    padding: 8px 18px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: var(--r-s);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: filter .15s, transform .08s;
+}
+
+.run-btn:hover {
+    filter: brightness(1.08);
+}
+
+.run-btn:active {
+    transform: translateY(1px);
+}
+
+.cmp-progress {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 10px;
+    min-height: 18px;
+}
+
+/* ───────────────────────── Results container ───────────────────────── */
+
+#batchResults {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ───────────────────────── Banner ───────────────────────── */
+
+.cmp-banner {
+    background: rgba(201, 242, 63, 0.06);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-s);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-family: var(--mono);
+}
+
+/* ───────────────────────── Table styling ───────────────────────── */
+
+.cmp-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.85rem;
+}
+
+.cmp-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--surface);
+}
+
+.cmp-table thead th {
+    padding: 11px 12px;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--line-2);
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-faint);
+    white-space: nowrap;
+}
+
+.cmp-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color .15s;
+}
+
+.cmp-table th.sortable:hover {
+    color: var(--text);
+}
+
+.sort-ind {
+    color: var(--accent);
+    margin-left: 4px;
+    font-size: 0.7em;
+}
+
+.cmp-table tbody tr {
+    border-bottom: 1px solid var(--line);
+    transition: background .15s;
+}
+
+.cmp-table tbody tr:hover {
+    background: var(--surface-2);
+}
+
+.cmp-table tbody td {
+    padding: 10px 12px;
+    vertical-align: middle;
+}
+
+/* ───────────────────────── Row index ───────────────────────── */
+
+.cmp-idx {
+    font-family: var(--mono);
+    color: var(--text-faint);
+    font-size: 0.8rem;
+}
+
+/* ───────────────────────── Candidate (name) cell ───────────────────────── */
+
+.cmp-cand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: inherit;
+    text-decoration: none;
+    min-width: 0;
+    transition: color .15s;
+}
+
+.cmp-table tbody tr:hover .cmp-cand {
+    color: var(--accent);
+}
+
+.cmp-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line-2);
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.cmp-id {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.cmp-name {
+    font-weight: 600;
+    font-size: 0.86rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cmp-login {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+}
+
+/* ───────────────────────── Numeric cells ───────────────────────── */
+
+.cmp-num {
+    font-family: var(--mono);
+    font-size: 0.86rem;
+    color: var(--text);
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* ───────────────────────── Heatmap spark (contribution chart) ───────────────────────── */
+
+.cmp-spark {
+    display: flex;
+    gap: 2px;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+}
+
+.cmp-spark .cmp-week {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cmp-cell {
+    width: 7px;
+    height: 7px;
+    border-radius: 1px;
+    background: var(--inset);
+    flex-shrink: 0;
+}
+
+.cmp-cell.cmp-empty {
+    background: transparent;
+}
+
+.cmp-cell[data-l="1"] {
+    background: rgba(201, 242, 63, 0.24);
+}
+
+.cmp-cell[data-l="2"] {
+    background: rgba(201, 242, 63, 0.45);
+}
+
+.cmp-cell[data-l="3"] {
+    background: rgba(201, 242, 63, 0.7);
+}
+
+.cmp-cell[data-l="4"] {
+    background: var(--accent);
+}
+
+/* ───────────────────────── Top repo ───────────────────────── */
+
+.cmp-toprepo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    transition: text-decoration .15s;
+}
+
+.cmp-toprepo:hover {
+    text-decoration: underline;
+}
+
+.cmp-toprepo .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ───────────────────────── Languages ───────────────────────── */
+
+.cmp-langs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cmp-lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.76rem;
+    color: var(--text-dim);
+    font-family: var(--mono);
+}
+
+/* ───────────────────────── Status cells ───────────────────────── */
+
+.cmp-muted {
+    color: var(--text-faint);
+}
+
+.cmp-err {
+    color: var(--danger);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+}
+
+/* ───────────────────────── Scrollbars ───────────────────────── */
+
+#batchResults::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+#batchResults::-webkit-scrollbar-thumb {
+    background: var(--line-2);
+    border-radius: 3px;
+}
+
+#batchResults::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* ───────────────────────── Responsive ───────────────────────── */
+
+@media (max-width: 720px) {
+    .batch-main {
+        padding: 12px;
+    }
+
+    .batch-input {
+        padding: 12px;
+    }
+
+    .batch-controls {
+        gap: 8px;
+    }
+
+    .file-label,
+    #tokenInput,
+    .run-btn {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .cmp-table thead th,
+    .cmp-table tbody td {
+        padding: 8px 10px;
+    }
+
+    .cmp-table thead th {
+        font-size: 0.65rem;
+    }
+
+    .cmp-table tbody td {
+        font-size: 0.8rem;
+    }
+
+    .cmp-avatar {
+        width: 26px;
+        height: 26px;
+    }
+
+    .cmp-name {
+        font-size: 0.8rem;
+    }
+
+    .cmp-login {
+        font-size: 0.65rem;
+    }
+
+    .cmp-num {
+        font-size: 0.8rem;
+    }
+
+    #batchResults {
+        overflow-x: auto;
+    }
+}
