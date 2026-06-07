@@ -3,46 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevPulse - GitHub Activity Dashboard</title>
+    <title>DevPulse — GitHub Activity Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Search Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1>DevPulse</h1>
-                <p class="subtitle">GitHub profile activity dashboard</p>
-                <div class="search-box">
-                    <input
-                        type="text"
-                        id="usernameInput"
-                        placeholder="Enter GitHub username..."
-                        class="search-input"
-                        autocomplete="off"
-                    >
-                    <button id="searchBtn" class="search-btn">Search</button>
-                </div>
-                <p class="search-hint">Try: <span id="exampleUser">torvalds</span></p>
-            </div>
-        </header>
+<div class="app">
 
-        <!-- Main Content -->
-        <main id="mainContent" class="main-content">
-            <!-- Will be populated dynamically -->
-        </main>
-    </div>
-
-    <!-- Loading Skeleton Template -->
-    <template id="skeletonTemplate">
-        <div class="card skeleton">
-            <div class="skeleton-line" style="width: 100%; height: 24px; margin-bottom: 12px;"></div>
-            <div class="skeleton-line" style="width: 90%; height: 16px; margin-bottom: 8px;"></div>
-            <div class="skeleton-line" style="width: 80%; height: 16px;"></div>
+    <!-- Top bar -->
+    <header class="topbar">
+        <span class="topbar-logo">DevPulse</span>
+        <div class="search-row">
+            <input type="text" id="usernameInput" class="search-input"
+                   placeholder="GitHub username..." autocomplete="off">
+            <button id="searchBtn" class="search-btn">Search</button>
         </div>
-    </template>
+        <p class="search-hint">Try: <span id="exampleUser">torvalds</span></p>
+    </header>
 
-    <script src="app.js"></script>
+    <!-- Dashboard area -->
+    <main id="dashArea"></main>
+
+</div>
+<script src="app.js"></script>
 </body>
 </html>
